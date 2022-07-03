@@ -88,7 +88,14 @@ def dictdiff(a, b, searchAttrs=[], ignoreKeys=[]):
     """
     if not (isinstance(a, dict) and isinstance(b, dict)):
         if isinstance(a, list) and isinstance(b, list):
-            return [dictdiff(v1, v2, searchAttrs, ignoreKeys) for v1, v2 in izip_destination(a, b, searchAttrs)]
+            tempList = []
+            for v1, v2 in izip_destination(a, b, searchAttrs):
+                compare = dictdiff(v1, v2, searchAttrs, ignoreKeys)
+                if (isinstance(compare, list) or isinstance(compare, dict)) and len(compare) == 0:
+                    continue
+                tempList.append(compare)
+            return tempList
+
         return b
     res = {}
     if izipDestinationMatching in b:
@@ -100,7 +107,11 @@ def dictdiff(a, b, searchAttrs=[], ignoreKeys=[]):
         if key in ignoreKeys: continue
         v1 = a.get(key, None)
         v2 = b.get(key, None)
-        if keepKey == key or v1 != v2: res[key] = dictdiff(v1, v2, searchAttrs, ignoreKeys)
+        if keepKey == key or v1 != v2:
+            compare = dictdiff(v1, v2, searchAttrs, ignoreKeys)
+            if (isinstance(compare, list) or isinstance(compare, dict)) and len(compare) == 0:
+                continue
+            res[key] = compare
     return res
 
 
